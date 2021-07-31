@@ -15,7 +15,7 @@ import { DeleteEventFab } from "../ui/DeleteEventFab";
 moment.locale("es");
 const localizer = momentLocalizer(moment);
 
-export const CalendarScreen = () => {
+const CalendarScreen = () => {
   const dispatch = useDispatch();
   const [lastView, setLastView] = useState(
     localStorage.getItem("lastView") || "month"
@@ -74,3 +74,5 @@ export const CalendarScreen = () => {
     </div>
   );
 };
+
+export default CalendarScreen;

@@ -6,6 +6,8 @@ import {
   Redirect,
 } from "react-router-dom";
 import { startCheckin } from "../../actions/auth";
+import ApartmentRegister from "../administration/apartments/ApartmentRegister";
+import SeasonRegister from "../administration/seasons/SeasonRegister";
 import { LoginScreen } from "../auth/LoginScreen";
 import AppContainer from "../container/AppContainer";
 import { PrivateRoute } from "./PrivateRoute";
@@ -40,7 +42,21 @@ export const AppRouter = () => {
                 <PrivateRoute 
                     exact 
                     path="/" 
-                    component={ AppContainer } 
+                    component={ AppContainer }
+                    isAuthenticated={ !!uid }
+                />
+                
+                <PrivateRoute 
+                    exact 
+                    path="/apartment-register"
+                    component={ApartmentRegister} 
+                    isAuthenticated={ !!uid }
+                />
+                
+                <PrivateRoute 
+                    exact 
+                    path="/season-register"
+                    component={SeasonRegister} 
                     isAuthenticated={ !!uid }
                 />
 

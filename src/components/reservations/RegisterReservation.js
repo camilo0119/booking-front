@@ -106,22 +106,22 @@ export const RegisterReservation = () => {
 
                 <div className="row">
                     <div className="col-sm">
-                    <div className="form-group">
-                        <label>Tipo Documento</label>
-                        <select className="form-control">
-                        {
-                            documentTypes.map(({id, value}) => (
-                            <option value={id} selected={id === 'CC' ? 'selected' : ''}>{value}</option>
-                            ))
-                        }
-                        </select>
-                    </div>
-                    </div>
-                    <div className="col-sm">
-                    <div className="form-group">
-                        <label>No. Documento</label>
-                        <input className="form-control" type='number'/>
-                    </div>
+                      <div className="form-group">
+                          <label>Tipo Documento</label>
+                          <select className="form-control">
+                          {
+                              documentTypes.map(({id, value}) => (
+                              <option value={id} selected={id === 'CC' ? 'selected' : ''}>{value}</option>
+                              ))
+                          }
+                          </select>
+                      </div>
+                      </div>
+                      <div className="col-sm">
+                      <div className="form-group">
+                          <label>No. Documento</label>
+                          <input className="form-control" type='number'/>
+                      </div>
                     </div>
                 </div>
                 

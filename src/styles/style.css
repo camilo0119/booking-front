@@ -39,3 +39,7 @@ html, body {
     left: 25px;
     padding: 10px;
 }
+
+.dropdown:hover>.dropdown-menu {
+    display: block;
+  }

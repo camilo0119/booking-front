@@ -1,11 +1,9 @@
 import React from 'react'
-import { CalendarScreen } from '../calendar/CalendarScreen';
-import NavBar from "../ui/NavBar";
+import CalendarScreen from '../calendar/CalendarScreen';
 
 const AppContainer = () => {
     return (
         <>
-            <NavBar />
             <CalendarScreen/>
         </>
     )

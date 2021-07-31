@@ -1,12 +1,17 @@
 const apartmentsPath = {
-    getAll: 'apartment/ediffice/'
+    getAll: 'apartment'
 }
 
 const edifficePath = {
     getAll: 'ediffice'
 }
 
+const seasonPath = {
+    getAll: '/season'
+}
+
 module.exports = {
     apartmentsPath,
-    edifficePath
+    edifficePath,
+    seasonPath
 }

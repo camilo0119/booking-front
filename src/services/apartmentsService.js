@@ -8,7 +8,12 @@ apartmentService.getAllApartments = () => {
 }
 
 apartmentService.getApartmentByEdiffice = async (edifficeId) => {
-    const response = await fetchWithToken(`${apartmentsPath.getAll}${edifficeId}`)
+    const response = await fetchWithToken(`${apartmentsPath.getAll}/ediffice/${edifficeId}`)
+    return await response.json()
+}
+
+apartmentService.save = async () => {
+    const response = await fetchWithToken(`${apartmentsPath}`)
     return await response.json()
 }
 
