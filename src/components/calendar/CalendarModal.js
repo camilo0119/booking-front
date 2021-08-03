@@ -15,6 +15,7 @@ import {
 import documentTypes from "../../constants/documentsTypes";
 import { edifficeService } from "../../services/edifficeService";
 import { apartmentService } from "../../services/apartmentsService";
+import { seasonService } from "../../services/seasonService";
 
 const customStyles = {
   content: {
@@ -22,7 +23,7 @@ const customStyles = {
     left: "50%",
     right: "auto",
     bottom: "auto",
-    height: 'auto',
+    height: "auto",
     marginRight: "-50%",
     transform: "translate(-50%, -50%)",
   },
@@ -47,16 +48,22 @@ const CalendarModal = () => {
     registerDate: now.toDate(),
   };
 
-  const [dateStart, setDateStart] = useState('');
-  const [dateEnd, setDateEnd] = useState('');
+  const [dateStart, setDateStart] = useState("");
+  const [dateEnd, setDateEnd] = useState("");
   const [formValues, setFormValues] = useState(initialState);
   const [edifficeList, setEdifficeList] = useState([]);
   const [listApartments, setListApartments] = useState([]);
   const dispatch = useDispatch();
   const { modalOpen } = useSelector((state) => state.ui);
   const { activeEvent } = useSelector((state) => state.calendar);
+  const [nightsNumber, setNightsNumber] = useState(0);
+  const [season, setSeason] = useState(null);
 
   const { notes, startDate, endDate } = formValues;
+  
+  useEffect(() => {
+    getAllEdiffices();
+  }, []);
 
   useEffect(() => {
     if (activeEvent) {
@@ -67,15 +74,18 @@ const CalendarModal = () => {
   }, [activeEvent]);
 
   useEffect(() => {
-    getAllEdiffices();
-  }, []);
-
+    getSeasonList()
+  }, [listApartments])
+  
   useEffect(() => {
     if (formValues.edifficeId) {
-      getApartmentList(formValues.edifficeId)
+      getApartmentList(formValues.edifficeId);
     }
-    console.log(formValues)
-  }, [formValues])
+    if (formValues.startDate && formValues.endDate) {
+      nightsNumberCalculate();
+    }
+    console.log(formValues);
+  }, [formValues]);
 
   const getAllEdiffices = async () => {
     const res = await edifficeService.getAll();
@@ -84,8 +94,14 @@ const CalendarModal = () => {
 
   const getApartmentList = async (idifficeId) => {
     const res = await apartmentService.getApartmentByEdiffice(idifficeId);
-    setListApartments(res?.apartmentsList)
+    setListApartments(res?.apartmentsList);
   };
+
+  const getSeasonList = async () => {
+    const res = await seasonService.getAll();
+    const seasonDefault = res?.seasonsList.filter(season => season?.default)
+    setSeason(seasonDefault)
+  }
 
   const closeModal = () => {
     dispatch(uiCloseModal());
@@ -110,7 +126,7 @@ const CalendarModal = () => {
   };
 
   const handleInputChange = (e) => {
-    const {target} = e
+    const { target } = e;
     setFormValues((old) => ({
       ...old,
       [target.name]: target.value,
@@ -147,6 +163,12 @@ const CalendarModal = () => {
     closeModal();
   };
 
+  const nightsNumberCalculate = () => {
+    const momentStart = moment(startDate);
+    const momentEnd = moment(endDate);
+    setNightsNumber(momentEnd.diff(momentStart, "days"));
+  };
+
   return (
     <diV>
       <Modal
@@ -161,118 +183,172 @@ const CalendarModal = () => {
         <hr />
         <form className="container" onSubmit={handleSubmitForm}>
           <div className="row">
-            <div className="col-sm">
-              <div className="form-group">
-                <label>Tipo Documento</label>
-                <select className="form-control" name="documentType" onChange={handleInputChange}>
-                  {documentTypes.map(({ id, value }) => (
-                    <option value={id} selected={id === "CC" ? "selected" : ""}>
-                      {value}
-                    </option>
-                  ))}
-                </select>
+            <div className="col-8">
+              <div className="row">
+                <div className="col-sm">
+                  <div className="form-group">
+                    <label>Tipo Documento</label>
+                    <select
+                      className="form-control"
+                      name="documentType"
+                      onChange={handleInputChange}
+                    >
+                      {documentTypes.map(({ id, value }) => (
+                        <option
+                          value={id}
+                          selected={id === "CC" ? "selected" : ""}
+                        >
+                          {value}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+                <div className="col-sm">
+                  <div className="form-group">
+                    <label>No. Documento</label>
+                    <input
+                      className="form-control"
+                      type="number"
+                      name="documentNumber"
+                      onChange={handleInputChange}
+                    />
+                  </div>
+                </div>
               </div>
-            </div>
-            <div className="col-sm">
-              <div className="form-group">
-                <label>No. Documento</label>
-                <input className="form-control" type="number" name="documentNumber" onChange={handleInputChange}/>
-              </div>
-            </div>
-          </div>
 
-          <div className="row">
-            <div className="col-sm">
-              <div className="form-group">
-                <label>Nombres</label>
-                <input className="form-control" name="documentNumber" onChange={handleInputChange}/>
+              <div className="row">
+                <div className="col-sm">
+                  <div className="form-group">
+                    <label>Nombres</label>
+                    <input
+                      className="form-control"
+                      name="documentNumber"
+                      onChange={handleInputChange}
+                    />
+                  </div>
+                </div>
+                <div className="col-sm">
+                  <div className="form-group">
+                    <label>Apellidos</label>
+                    <input
+                      className="form-control"
+                      name="documentNumber"
+                      onChange={handleInputChange}
+                    />
+                  </div>
+                </div>
               </div>
-            </div>
-            <div className="col-sm">
-              <div className="form-group">
-                <label>Apellidos</label>
-                <input className="form-control" name="documentNumber" onChange={handleInputChange}/>
-              </div>
-            </div>
-          </div>
 
-          <div className="row">
+              <div className="row">
+                <div className="col-sm">
+                  <div className="form-group">
+                    <label>Edificio</label>
+                    <select
+                      className="form-control"
+                      name="edifficeId"
+                      onChange={handleInputChange}
+                    >
+                      <option value="" disabled selected>
+                        Seleccione una opción
+                      </option>
+                      {edifficeList &&
+                        edifficeList.map(({ name, _id }) => (
+                          <option key={_id} value={_id}>
+                            {name}
+                          </option>
+                        ))}
+                    </select>
+                  </div>
+                </div>
+                <div className="col-sm">
+                  <div className="form-group">
+                    <label>Apartamento</label>
+                    <select
+                      className="form-control"
+                      name="propertyId"
+                      onChange={handleInputChange}
+                      key={formValues.edifficeId}
+                      disabled={!listApartments}
+                    >
+                      <option value="" disabled selected>
+                        Seleccione una opción
+                      </option>
+                      {listApartments &&
+                        listApartments.map(({ name, _id }) => (
+                          <option key={_id} value={_id}>
+                            {name}
+                          </option>
+                        ))}
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <div className="row">
+                <div className="col-sm">
+                  <div className="form-group">
+                    <label>Fecha y hora inicio</label>
+                    <DateTimePicker
+                      onChange={handleStartDateChange}
+                      value={dateStart}
+                      className="form-control"
+                    />
+                  </div>
+                </div>
+                <div className="col-sm">
+                  <div className="form-group">
+                    <label>Fecha y hora fin</label>
+                    <DateTimePicker
+                      onChange={handleEndDateChange}
+                      value={dateEnd}
+                      minDate={dateStart}
+                      className="form-control"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="row">
+                <div className="col-sm">
+                  <div className="form-group">
+                    <textarea
+                      style={{ height: "80px" }}
+                      type="text"
+                      className="form-control"
+                      placeholder="Notas"
+                      rows="5"
+                      name="notes"
+                      value={notes}
+                      onChange={handleInputChange}
+                    ></textarea>
+                    <small id="emailHelp" className="form-text text-muted">
+                      Información adicional
+                    </small>
+                  </div>
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                className="btn btn-outline-primary btn-block"
+              >
+                <i className="far fa-save"></i>
+                <span> Guardar</span>
+              </button>
+            </div>
             <div className="col-sm">
-              <div className="form-group">
-                <label>Edificio</label>
-                <select className="form-control" name="edifficeId" onChange={handleInputChange}>
-                  <option value="" disabled selected>Seleccione una opción</option>
-                  { edifficeList && 
-                    edifficeList.map(({ name, _id }) => (
-                      <option key={_id} value={_id}>{name}</option>
-                    ))
+              <h6>Resumen de reserva</h6>
+              <div className="row">
+                <div className="col-sm">{nightsNumber} noches</div>
+                <div className="col-sm">
+                  {listApartments && 
+                    null
                   }
-                </select>
-              </div>
-            </div>
-            <div className="col-sm">
-              <div className="form-group">
-                <label>Apartamento</label>
-                <select className="form-control" name="propertyId" onChange={handleInputChange} key={formValues.edifficeId} disabled={!listApartments}>
-                  <option value="" disabled selected>Seleccione una opción</option>
-                  { listApartments &&
-                    listApartments.map(({ name, _id }) => (
-                      <option key={_id} value={_id}>{name}</option>
-                    ))
-                  }
-                </select>
+                </div>
               </div>
             </div>
           </div>
-
-          <div className="row">
-            <div className="col-sm">
-              <div className="form-group">
-                <label>Fecha y hora inicio</label>
-                <DateTimePicker
-                  onChange={handleStartDateChange}
-                  value={dateStart}
-                  className="form-control"
-                />
-              </div>
-            </div>
-            <div className="col-sm">
-              <div className="form-group">
-                <label>Fecha y hora fin</label>
-                <DateTimePicker
-                  onChange={handleEndDateChange}
-                  value={dateEnd}
-                  minDate={dateStart}
-                  className="form-control"
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className="row">
-            <div className="col-sm">
-              <div className="form-group">
-                <textarea
-                style={{height: '80px'}}
-                  type="text"
-                  className="form-control"
-                  placeholder="Notas"
-                  rows="5"
-                  name="notes"
-                  value={notes}
-                  onChange={handleInputChange}
-                ></textarea>
-                <small id="emailHelp" className="form-text text-muted">
-                  Información adicional
-                </small>
-              </div>
-            </div>
-          </div>
-
-          <button type="submit" className="btn btn-outline-primary btn-block">
-            <i className="far fa-save"></i>
-            <span> Guardar</span>
-          </button>
         </form>
       </Modal>
     </diV>

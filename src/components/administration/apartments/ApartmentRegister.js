@@ -5,7 +5,6 @@ import { edifficeService } from "../../../services/edifficeService";
 import { seasonService } from "../../../services/seasonService";
 import { apartmentService } from "../../../services/apartmentsService";
 import Swal from "sweetalert2";
-import * as yup from 'yup';
 import { apartmentSchema } from "../../models/validations/apartmentValidation";
 
 const ApartmentRegister = () => {
@@ -25,10 +24,6 @@ const ApartmentRegister = () => {
   const [formData, handleInputChange, reset] = useForm(initialState);
   const [edifficeList, setEdifficeList] = useState([]);
   const [seasonList, setSeasonList] = useState([]);
-
-  useEffect(() => {
-    console.log(formData);
-  }, [formData]);
 
   useEffect(() => {
     getAllEdiffices();

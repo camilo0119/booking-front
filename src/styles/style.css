@@ -42,4 +42,22 @@ html, body {
 
 .dropdown:hover>.dropdown-menu {
     display: block;
-  }
+}
+
+
+/* Spacing general */
+.mt0 {
+    margin-top: 0 !important;
+}
+.mt10 {
+    margin-top: 10px;
+}
+.mt20 {
+    margin-top: 20px;
+}
+.mt30 {
+    margin-top: 30px;
+}
+.mt40 {
+    margin-top: 40px;
+}

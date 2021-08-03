@@ -14,7 +14,7 @@ export const useForm = ( initialState = {} ) => {
 
         setValues({
             ...values,
-            [ target.name ]: target.value
+            [ target.name ]: target.name === 'name' ? target.value.toUpperCase() : target.value
         });
 
     }

@@ -4,16 +4,19 @@ const { fetchWithToken } = require("../helpers/fetch")
 const apartmentService = {}
 
 apartmentService.getAllApartments = () => {
-    return fetchWithToken(`${apartmentsPath.getAll}`)
+    return fetchWithToken(`${apartmentsPath.root}`)
 }
 
 apartmentService.getApartmentByEdiffice = async (edifficeId) => {
-    const response = await fetchWithToken(`${apartmentsPath.getAll}/ediffice/${edifficeId}`)
+    const response = await fetchWithToken(`${apartmentsPath.root}/ediffice/${edifficeId}`)
     return await response.json()
 }
 
-apartmentService.save = async () => {
-    const response = await fetchWithToken(`${apartmentsPath}`)
+apartmentService.save = async (payload) => {
+    const response = await fetchWithToken(
+        `${apartmentsPath.root}`,
+        payload,
+        'POST')
     return await response.json()
 }
 
