@@ -16,6 +16,8 @@ import documentTypes from "../../constants/documentsTypes";
 import { edifficeService } from "../../services/edifficeService";
 import { apartmentService } from "../../services/apartmentsService";
 import { seasonService } from "../../services/seasonService";
+import { getSeason } from "../../actions/season";
+import { SeasonInfo } from "../administration/seasons/SeasonInfo";
 
 const customStyles = {
   content: {
@@ -56,13 +58,17 @@ const CalendarModal = () => {
   const dispatch = useDispatch();
   const { modalOpen } = useSelector((state) => state.ui);
   const { activeEvent } = useSelector((state) => state.calendar);
+  const { seasonList } = useSelector((state) => state.season);
   const [nightsNumber, setNightsNumber] = useState(0);
   const [season, setSeason] = useState(null);
+  const [apartmentSelected, setApartmentSelected] = useState(null);
+  const [priceResume, setPriceResume] = useState({});
 
   const { notes, startDate, endDate } = formValues;
   
   useEffect(() => {
     getAllEdiffices();
+    dispatch(getSeason());
   }, []);
 
   useEffect(() => {
@@ -74,18 +80,30 @@ const CalendarModal = () => {
   }, [activeEvent]);
 
   useEffect(() => {
-    getSeasonList()
-  }, [listApartments])
+    handleDefaultSeason()
+  }, [seasonList])
+
+  useEffect(() => {
+    if (nightsNumber > 0 && apartmentSelected) {
+      priceCalculate()
+    }
+  }, [nightsNumber, apartmentSelected])
   
   useEffect(() => {
     if (formValues.edifficeId) {
       getApartmentList(formValues.edifficeId);
     }
-    if (formValues.startDate && formValues.endDate) {
-      nightsNumberCalculate();
-    }
-    console.log(formValues);
+    /* Calcular noches */
+    nightsNumberCalculate();
+    console.log(formValues)
   }, [formValues]);
+
+  useEffect(() => {
+    setFormValues(old => ({
+      ...old,
+      propertyId: ""
+    }))
+  }, [formValues.edifficeId])
 
   const getAllEdiffices = async () => {
     const res = await edifficeService.getAll();
@@ -97,10 +115,25 @@ const CalendarModal = () => {
     setListApartments(res?.apartmentsList);
   };
 
-  const getSeasonList = async () => {
-    const res = await seasonService.getAll();
-    const seasonDefault = res?.seasonsList.filter(season => season?.default)
-    setSeason(seasonDefault)
+  const handleDefaultSeason = async () => {
+      const seasonDefault = seasonList.filter(season => season?.default)?.[0]
+      setSeason(seasonDefault)
+      if (season) {
+        console.log({
+          low: {
+            from: moment(season.seasonLowDate.from).format(),
+            to: moment(season.seasonLowDate.to).format(),
+          },
+          mid: {
+            from: moment(season.seasonMidDate.from).format(),
+            to: moment(season.seasonMidDate.to).format(),
+          },
+          hig: {
+            from: moment(season.seasonHighDate.from).format(),
+            to: moment(season.seasonHighDate.to).format(),
+          }
+        })
+      }
   }
 
   const closeModal = () => {
@@ -164,10 +197,52 @@ const CalendarModal = () => {
   };
 
   const nightsNumberCalculate = () => {
-    const momentStart = moment(startDate);
-    const momentEnd = moment(endDate);
-    setNightsNumber(momentEnd.diff(momentStart, "days"));
+    if (formValues.startDate && formValues.endDate) {
+      const momentStart = moment(startDate);
+      const momentEnd = moment(endDate);
+      setNightsNumber(momentEnd.diff(momentStart, "days"));
+    } else {
+      setNightsNumber(0)
+    }
   };
+
+  const handleApartmentSelect = ({target}) => {
+    const apartmentData = JSON.parse(target.value)
+    if (apartmentData._id) {
+      setApartmentSelected(apartmentData)
+      setFormValues(old => ({
+        ...old,
+        propertyId: apartmentData._id
+      }))
+    }
+  }
+
+  const priceCalculate = () => {
+    let dayPriceBySeasonDate = {
+      highSeason: [],
+      midSeason: [],
+      lowSeason: []
+    }
+    const format = 'YYYY-MM-DD HH:mm'
+    const dateStart = moment(startDate).format(format);
+    let currentDate = dateStart;
+    const {seasonMidDate, seasonHighDate} = season;
+    for (let i = 0; i < nightsNumber; i++) {
+      currentDate = moment(currentDate).add(1, 'days').format(format)
+      if (moment(currentDate).isBetween(moment(seasonHighDate.from).format(format), moment(seasonHighDate.to).format(format))) {
+        dayPriceBySeasonDate.highSeason.push(apartmentSelected.seasonHighPrice)
+      } else if (moment(currentDate).isBetween(moment(seasonMidDate.from).format(format), moment(seasonMidDate.to).format(format))) {
+        dayPriceBySeasonDate.midSeason.push(apartmentSelected.seasonMidPrice)
+      } else {
+        dayPriceBySeasonDate.lowSeason.push(apartmentSelected.seasonLowPrice)
+      }
+    }
+    setPriceResume(dayPriceBySeasonDate)
+  }
+
+  const sumTotal = (array) => {
+    return Object.values(array).reduce((a, b) => a + b, 0)
+  }
 
   return (
     <diV>
@@ -249,7 +324,7 @@ const CalendarModal = () => {
                       name="edifficeId"
                       onChange={handleInputChange}
                     >
-                      <option value="" disabled selected>
+                      <option value="" defaultValue>
                         Seleccione una opción
                       </option>
                       {edifficeList &&
@@ -267,17 +342,17 @@ const CalendarModal = () => {
                     <select
                       className="form-control"
                       name="propertyId"
-                      onChange={handleInputChange}
+                      onChange={handleApartmentSelect}
                       key={formValues.edifficeId}
                       disabled={!listApartments}
                     >
-                      <option value="" disabled selected>
+                      <option value="" defaultValue="">
                         Seleccione una opción
                       </option>
                       {listApartments &&
-                        listApartments.map(({ name, _id }) => (
-                          <option key={_id} value={_id}>
-                            {name}
+                        listApartments.map((apartmentData) => (
+                          <option key={apartmentData._id} value={JSON.stringify(apartmentData)}>
+                            {apartmentData.name}
                           </option>
                         ))}
                     </select>
@@ -340,11 +415,23 @@ const CalendarModal = () => {
             <div className="col-sm">
               <h6>Resumen de reserva</h6>
               <div className="row">
-                <div className="col-sm">{nightsNumber} noches</div>
                 <div className="col-sm">
-                  {listApartments && 
-                    null
-                  }
+                  <p style={{fontSize: 14}}>
+                    {priceResume && priceResume?.lowSeason?.length > 0 && `(${priceResume.lowSeason.length}) noches en temporada baja a $${priceResume.lowSeason[0]}`}
+                    {priceResume && priceResume?.midSeason?.length > 0 && `(${priceResume.midSeason.length}) noches en temporada media a $${priceResume.midSeason[0]}`}
+                    {priceResume && priceResume?.highSeason?.length > 0 && `(${priceResume.highSeason.length}) noches en temporada alta a $${priceResume.highSeason[0]}`}
+                  </p>
+                </div>
+              </div>
+              <hr/>
+              <div className="row">
+                <div className="col-sm">
+                  {priceResume && (() => sumTotal(priceResume))}
+                </div>
+              </div>
+              <div className="row">
+                <div className="col-sm">
+                  <SeasonInfo/>
                 </div>
               </div>
             </div>

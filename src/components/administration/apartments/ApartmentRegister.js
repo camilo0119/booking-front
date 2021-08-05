@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { useForm } from "../../../hooks/useForm";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { edifficeService } from "../../../services/edifficeService";
-import { seasonService } from "../../../services/seasonService";
 import { apartmentService } from "../../../services/apartmentsService";
 import Swal from "sweetalert2";
 import { apartmentSchema } from "../../models/validations/apartmentValidation";
+import { getSeason } from "../../../actions/season";
 
 const ApartmentRegister = () => {
   const {auth} = useSelector((state) => state);
+  const {seasonList} = useSelector(state => state.season);
 
   const initialState = {
     name: "",
@@ -23,11 +24,15 @@ const ApartmentRegister = () => {
 
   const [formData, handleInputChange, reset] = useForm(initialState);
   const [edifficeList, setEdifficeList] = useState([]);
-  const [seasonList, setSeasonList] = useState([]);
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    console.log('formData', formData)
+  }, [formData])
 
   useEffect(() => {
     getAllEdiffices();
-    getAllSeason();
+    dispatch(getSeason())
   }, []);
 
   const getAllEdiffices = async () => {
@@ -35,38 +40,40 @@ const ApartmentRegister = () => {
     setEdifficeList(res?.listEdiffices);
   };
 
-  const getAllSeason = async () => {
-    const res = await seasonService.getAll();
-    setSeasonList(res?.seasonsList);
-  };
-
   const handleSubmitForm = async (e) => {
     e.preventDefault();
-    const isValidForm = await apartmentSchema.isValid(formData)
-    if (isValidForm) {
+    await apartmentSchema.isValid(formData)
+    .then(async valid => {
+      if (!valid) {
         try {
-            const res = await apartmentService.save(formData);
-            if (res.ok) {
-                Swal.fire({
-                    title: 'Apartamento Guardado!',
-                    text: 'La información del apartamento ha sido almacenada correctamente',
-                    icon: 'success'
-                })
-            }
+          const res = await apartmentService.save(formData);
+          if (res.ok) {
+              Swal.fire({
+                  title: 'Apartamento Guardado!',
+                  text: 'La información del apartamento ha sido almacenada correctamente',
+                  icon: 'success'
+              })
+          }
         } catch (error) {
             Swal.fire({
                 title: 'Lo sentimos!',
                 text: 'Ha ocurrido un error guardando el apartamento',
                 icon: 'error'
             })
-        }
-    } else {
-        Swal.fire({
-            title: 'Formulario incompleto!',
-            text: 'Por favor complete todos los campos obligatorios',
-            icon: 'warning'
-        })
-    }
+          }
+      } 
+      // else {
+      //   await apartmentSchema.validate().catch(e => {
+      //     if (e?.errors) {
+      //       Swal.fire({
+      //         title: 'Formulario incompleto!',
+      //         text: 'Por favor complete todos los campos obligatorios' + JSON.stringify(e.errors),
+      //         icon: 'warning'
+      //       })
+      //     }
+      //   })
+      // }
+    })
   };
 
   return (

@@ -17,6 +17,8 @@ export const types = {
     authStartTokenRenew: '[auth] Start token renew',
     authLogout: '[auth] Start logout',
 
-    edifficeGetAll: '[ediffice] Get All'
+    edifficeGetAll: '[ediffice] Get All',
+
+    season: '[season] Current season'
 
 }

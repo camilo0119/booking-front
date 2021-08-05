@@ -17,7 +17,7 @@ const NavBar = () => {
       <span className="navbar-brand">{name}</span>
 
       <button
-        class="navbar-toggler d-sm-none d-block"
+        className="navbar-toggler d-sm-none d-block"
         type="button"
         data-toggle="collapse"
         data-target="#navbarNavDropdown"
@@ -25,44 +25,44 @@ const NavBar = () => {
         aria-expanded="false"
         aria-label="Toggle navigation"
       >
-        <span class="navbar-toggler-icon"></span>
+        <span className="navbar-toggler-icon"></span>
       </button>
 
-      <div class="collapse navbar-collapse" id="navbarNavDropdown">
-        <ul class="navbar-nav">
-            <li class="nav-item active">
-                <Link class="nav-link" to="/">Inicio <span class="sr-only">(current)</span></Link>
+      <div className="collapse navbar-collapse" id="navbarNavDropdown">
+        <ul className="navbar-nav">
+            <li className="nav-item active">
+                <Link className="nav-link" to="/">Inicio <span className="sr-only">(current)</span></Link>
             </li>
-            <li class="nav-item dropdown">
-                <span type="button" class="nav-link dropdown-toggle" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <li className="nav-item dropdown">
+                <span type="button" className="nav-link dropdown-toggle" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     Reservas
                 </span>
-                <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-                    <a class="dropdown-item" href="#">Action</a>
-                    <a class="dropdown-item" href="#">Another action</a>
-                    <div class="dropdown-divider"></div>
-                    <a class="dropdown-item" href="#">Something else here</a>
+                <div className="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                    <a className="dropdown-item" href="#">Action</a>
+                    <a className="dropdown-item" href="#">Another action</a>
+                    <div className="dropdown-divider"></div>
+                    <a className="dropdown-item" href="#">Something else here</a>
                 </div>
             </li>
-            <li class="nav-item dropdown">
-                <span type="button" class="nav-link dropdown-toggle" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <li className="nav-item dropdown">
+                <span type="button" className="nav-link dropdown-toggle" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     Administración
                 </span>
-                <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-                    <Link class="dropdown-item" to="/apartment-register">Registrar Apartamento</Link>
-                    <Link class="dropdown-item" to="/season-register">Registrar Temporada</Link>
+                <div className="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                    <Link className="dropdown-item" to="/apartment-register">Registrar Apartamento</Link>
+                    <Link className="dropdown-item" to="/season-register">Registrar Temporada</Link>
                 </div>
             </li>
-            {/* <li class="nav-item">
-                <a class="nav-link" href="#">Administración</a>
+            {/* <li className="nav-item">
+                <a className="nav-link" href="#">Administración</a>
             </li>
-            <li class="nav-item">
-                <a class="nav-link disabled" href="#">Disabled</a>
+            <li className="nav-item">
+                <a className="nav-link disabled" href="#">Disabled</a>
             </li> */}
         </ul>
-        {/* <form class="form-inline my-2 my-lg-0">
-            <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search"/>
-            <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+        {/* <form className="form-inline my-2 my-lg-0">
+            <input className="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search"/>
+            <button className="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
         </form> */}
     </div>
 
