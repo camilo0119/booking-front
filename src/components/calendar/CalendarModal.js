@@ -3,7 +3,7 @@ import moment from "moment";
 
 import Modal from "react-modal";
 import "../../styles/modal.css";
-import DateTimePicker from "react-datetime-picker";
+import DatePicker from 'react-date-picker';
 import Swal from "sweetalert2";
 import { useDispatch, useSelector } from "react-redux";
 import { uiCloseModal } from "../../actions/ui";
@@ -65,7 +65,7 @@ const CalendarModal = () => {
   const [priceResume, setPriceResume] = useState({});
 
   const { notes, startDate, endDate } = formValues;
-  
+
   useEffect(() => {
     getAllEdiffices();
     dispatch(getSeason());
@@ -80,30 +80,29 @@ const CalendarModal = () => {
   }, [activeEvent]);
 
   useEffect(() => {
-    handleDefaultSeason()
-  }, [seasonList])
+    handleDefaultSeason();
+  }, [seasonList]);
 
   useEffect(() => {
     if (nightsNumber > 0 && apartmentSelected) {
-      priceCalculate()
+      priceCalculate();
     }
-  }, [nightsNumber, apartmentSelected])
-  
+  }, [nightsNumber, apartmentSelected]);
+
   useEffect(() => {
     if (formValues.edifficeId) {
       getApartmentList(formValues.edifficeId);
     }
     /* Calcular noches */
     nightsNumberCalculate();
-    console.log(formValues)
   }, [formValues]);
 
   useEffect(() => {
-    setFormValues(old => ({
+    setFormValues((old) => ({
       ...old,
-      propertyId: ""
-    }))
-  }, [formValues.edifficeId])
+      propertyId: "",
+    }));
+  }, [formValues.edifficeId]);
 
   const getAllEdiffices = async () => {
     const res = await edifficeService.getAll();
@@ -116,25 +115,9 @@ const CalendarModal = () => {
   };
 
   const handleDefaultSeason = async () => {
-      const seasonDefault = seasonList.filter(season => season?.default)?.[0]
-      setSeason(seasonDefault)
-      if (season) {
-        console.log({
-          low: {
-            from: moment(season.seasonLowDate.from).format(),
-            to: moment(season.seasonLowDate.to).format(),
-          },
-          mid: {
-            from: moment(season.seasonMidDate.from).format(),
-            to: moment(season.seasonMidDate.to).format(),
-          },
-          hig: {
-            from: moment(season.seasonHighDate.from).format(),
-            to: moment(season.seasonHighDate.to).format(),
-          }
-        })
-      }
-  }
+    const seasonDefault = seasonList.filter((season) => season?.default)?.[0];
+    setSeason(seasonDefault);
+  };
 
   const closeModal = () => {
     dispatch(uiCloseModal());
@@ -202,47 +185,54 @@ const CalendarModal = () => {
       const momentEnd = moment(endDate);
       setNightsNumber(momentEnd.diff(momentStart, "days"));
     } else {
-      setNightsNumber(0)
+      setNightsNumber(0);
     }
   };
 
-  const handleApartmentSelect = ({target}) => {
-    const apartmentData = JSON.parse(target.value)
+  const handleApartmentSelect = ({ target }) => {
+    const apartmentData = JSON.parse(target.value);
+    console.log(apartmentData);
     if (apartmentData._id) {
-      setApartmentSelected(apartmentData)
-      setFormValues(old => ({
+      setApartmentSelected(apartmentData);
+      setFormValues((old) => ({
         ...old,
-        propertyId: apartmentData._id
-      }))
+        propertyId: apartmentData._id,
+      }));
     }
-  }
+  };
 
   const priceCalculate = () => {
     let dayPriceBySeasonDate = {
       highSeason: [],
       midSeason: [],
-      lowSeason: []
-    }
-    const format = 'YYYY-MM-DD HH:mm'
+      lowSeason: [],
+    };
+    const format = "YYYY-MM-DD HH:mm";
     const dateStart = moment(startDate).format(format);
     let currentDate = dateStart;
-    const {seasonMidDate, seasonHighDate} = season;
+    const { seasonMidDate, seasonHighDate } = season;
     for (let i = 0; i < nightsNumber; i++) {
-      currentDate = moment(currentDate).add(1, 'days').format(format)
-      if (moment(currentDate).isBetween(moment(seasonHighDate.from).format(format), moment(seasonHighDate.to).format(format))) {
-        dayPriceBySeasonDate.highSeason.push(apartmentSelected.seasonHighPrice)
-      } else if (moment(currentDate).isBetween(moment(seasonMidDate.from).format(format), moment(seasonMidDate.to).format(format))) {
-        dayPriceBySeasonDate.midSeason.push(apartmentSelected.seasonMidPrice)
+      currentDate = moment(currentDate).add(1, "days").format(format);
+      if (
+        moment(currentDate).isBetween(
+          moment(seasonHighDate.from).format(format),
+          moment(seasonHighDate.to).format(format)
+        )
+      ) {
+        dayPriceBySeasonDate.highSeason.push(apartmentSelected.seasonHighPrice);
+      } else if (
+        moment(currentDate).isBetween(
+          moment(seasonMidDate.from).format(format),
+          moment(seasonMidDate.to).format(format)
+        )
+      ) {
+        dayPriceBySeasonDate.midSeason.push(apartmentSelected.seasonMidPrice);
       } else {
-        dayPriceBySeasonDate.lowSeason.push(apartmentSelected.seasonLowPrice)
+        dayPriceBySeasonDate.lowSeason.push(apartmentSelected.seasonLowPrice);
       }
     }
-    setPriceResume(dayPriceBySeasonDate)
-  }
-
-  const sumTotal = (array) => {
-    return Object.values(array).reduce((a, b) => a + b, 0)
-  }
+    setPriceResume(dayPriceBySeasonDate);
+  };
 
   return (
     <diV>
@@ -258,7 +248,7 @@ const CalendarModal = () => {
         <hr />
         <form className="container" onSubmit={handleSubmitForm}>
           <div className="row">
-            <div className="col-8">
+            <div className="col-sm-12 col-lg-8 col-xl-8">
               <div className="row">
                 <div className="col-sm">
                   <div className="form-group">
@@ -351,7 +341,10 @@ const CalendarModal = () => {
                       </option>
                       {listApartments &&
                         listApartments.map((apartmentData) => (
-                          <option key={apartmentData._id} value={JSON.stringify(apartmentData)}>
+                          <option
+                            key={apartmentData._id}
+                            value={JSON.stringify(apartmentData)}
+                          >
                             {apartmentData.name}
                           </option>
                         ))}
@@ -364,7 +357,7 @@ const CalendarModal = () => {
                 <div className="col-sm">
                   <div className="form-group">
                     <label>Fecha y hora inicio</label>
-                    <DateTimePicker
+                    <DatePicker
                       onChange={handleStartDateChange}
                       value={dateStart}
                       className="form-control"
@@ -374,7 +367,7 @@ const CalendarModal = () => {
                 <div className="col-sm">
                   <div className="form-group">
                     <label>Fecha y hora fin</label>
-                    <DateTimePicker
+                    <DatePicker
                       onChange={handleEndDateChange}
                       value={dateEnd}
                       minDate={dateStart}
@@ -412,22 +405,17 @@ const CalendarModal = () => {
                 <span> Guardar</span>
               </button>
             </div>
-            <div>
-              <h6>Resumen de reserva</h6>
+            <div className="col-sm-12 col-lg-4 col-xl-4">
               <div className="row">
                 <div className="col-sm">
-                  {priceResume && <PaymentResume dataSeason={priceResume}/>}
+                  <h6>Resumen de reserva</h6>
+                  <PaymentResume dataSeason={priceResume} />
                 </div>
               </div>
-              <hr/>
+              <hr />
               <div className="row">
-                <div className="col-sm">
-                  {priceResume && (() => sumTotal(priceResume))}
-                </div>
-              </div>
-              <div className="row">
-                <div className="col-sm">
-                  <SeasonInfo/>
+              <div className="col-sm">
+                  <SeasonInfo />
                 </div>
               </div>
             </div>

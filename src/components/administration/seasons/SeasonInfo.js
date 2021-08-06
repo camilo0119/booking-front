@@ -8,7 +8,7 @@ export const SeasonInfo = (showList = false) => {
   const { seasonList } = useSelector((state) => state.season);
   const [seasonInfo, setSeasonInfo] = useState(null);
   const dispatch = useDispatch();
-  const format = CONSTANS.dateFormat
+  const format = CONSTANS.dateFormat;
 
   useEffect(() => {
     if (!seasonList) {
@@ -27,28 +27,44 @@ export const SeasonInfo = (showList = false) => {
   };
 
   return (
-      <>
-      <select
+    <>
+      {!showList && (
+        <select
           className="form-control form-control-sm"
           name="season"
           onChange={handleLoadSeason}
         >
           {seasonList &&
             seasonList.map((season) => (
-                <option key={season._id} value={JSON.stringify(season)}>
+              <option key={season._id} value={JSON.stringify(season)}>
                 {season.name}
               </option>
             ))}
         </select>
-        <div class="card mt20">
+      )}
+      <div class="card mt20">
         <div class="card-body">
-        <h6 class="card-title">DET. TEMPORADA</h6>
-        <h7 class="card-subtitle mb-2 text-muted">{seasonInfo?.name}</h7>
-        <p class="card-text" style={{fontSize: 12}}><strong>Temp. Baja</strong> {moment(seasonInfo?.seasonLowDate?.from).format(format)} hasta {moment(seasonInfo?.seasonLowDate?.to).format(format)}</p>
-        <p class="card-text" style={{fontSize: 12}}><strong>Temp. Media</strong> {moment(seasonInfo?.seasonMidDate?.from).format(format)} hasta {moment(seasonInfo?.seasonMidDate?.to).format(format)}</p>
-        <p class="card-text" style={{fontSize: 12}}><strong>Temp. Alta</strong> {moment(seasonInfo?.seasonHighDate?.from).format(format)} hasta {moment(seasonInfo?.seasonHighDate?.to).format(format)}</p>
+          <h6 class="card-title">DET. TEMPORADA</h6>
+          <p class="card-subtitle mb-2 text-muted" style={{ fontSize: 12 }}>
+            {seasonInfo?.name}
+          </p>
+          <p class="card-text" style={{ fontSize: 12 }}>
+            <strong>Temp. Baja</strong>{" "}
+            {moment(seasonInfo?.seasonLowDate?.from).format(format)} hasta{" "}
+            {moment(seasonInfo?.seasonLowDate?.to).format(format)}
+          </p>
+          <p class="card-text" style={{ fontSize: 12 }}>
+            <strong>Temp. Media</strong>{" "}
+            {moment(seasonInfo?.seasonMidDate?.from).format(format)} hasta{" "}
+            {moment(seasonInfo?.seasonMidDate?.to).format(format)}
+          </p>
+          <p class="card-text" style={{ fontSize: 12 }}>
+            <strong>Temp. Alta</strong>{" "}
+            {moment(seasonInfo?.seasonHighDate?.from).format(format)} hasta{" "}
+            {moment(seasonInfo?.seasonHighDate?.to).format(format)}
+          </p>
         </div>
-    </div>
+      </div>
     </>
   );
 };
