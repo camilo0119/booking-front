@@ -15,9 +15,9 @@ import {
 import documentTypes from "../../constants/documentsTypes";
 import { edifficeService } from "../../services/edifficeService";
 import { apartmentService } from "../../services/apartmentsService";
-import { seasonService } from "../../services/seasonService";
 import { getSeason } from "../../actions/season";
 import { SeasonInfo } from "../administration/seasons/SeasonInfo";
+import PaymentResume from "../administration/payment/PaymentResume";
 
 const customStyles = {
   content: {
@@ -412,15 +412,11 @@ const CalendarModal = () => {
                 <span> Guardar</span>
               </button>
             </div>
-            <div className="col-sm">
+            <div>
               <h6>Resumen de reserva</h6>
               <div className="row">
                 <div className="col-sm">
-                  <p style={{fontSize: 14}}>
-                    {priceResume && priceResume?.lowSeason?.length > 0 && `(${priceResume.lowSeason.length}) noches en temporada baja a $${priceResume.lowSeason[0]}`}
-                    {priceResume && priceResume?.midSeason?.length > 0 && `(${priceResume.midSeason.length}) noches en temporada media a $${priceResume.midSeason[0]}`}
-                    {priceResume && priceResume?.highSeason?.length > 0 && `(${priceResume.highSeason.length}) noches en temporada alta a $${priceResume.highSeason[0]}`}
-                  </p>
+                  {priceResume && <PaymentResume dataSeason={priceResume}/>}
                 </div>
               </div>
               <hr/>
