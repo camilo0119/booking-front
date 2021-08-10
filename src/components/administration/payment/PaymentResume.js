@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import NumberFormat from "react-number-format";
 import { MdModeEdit } from "react-icons/md";
 
@@ -8,12 +8,38 @@ const PaymentResume = (props) => {
     totalNights: 0,
     totalPayment: 0,
   };
+  const initialPricesSeason = {
+    highSeason: null,
+    lowSeason: null,
+    midSeason: null,
+  };
+
+  const useOutSideInput = () => {
+    useEffect(() => {
+      const handleClickOutside = (event) => {
+        if (inputRef.current && !inputRef.current.contains(event.target)) {
+          setEditPriceMode(initialPricesSeason)
+        }
+      }
+      document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+        // Unbind the event listener on clean up
+        document.removeEventListener("mousedown", handleClickOutside);
+      };
+    }, [inputRef])
+  }
+
   const [priceResume, setPriceResume] = useState({});
   const [total, setTotal] = useState(initialStateTotal);
+  const [priceNight, setPriceNight] = useState(initialPricesSeason);
+  const [editPriceMode, setEditPriceMode] = useState(initialPricesSeason);
+  const inputRef = useRef(null);
+  useOutSideInput(inputRef);
 
   useEffect(() => {
     setPriceResume(dataSeason);
     handleTotals();
+    console.log(dataSeason);
   }, [dataSeason]);
 
   const PricesSeason = () => {
@@ -29,21 +55,38 @@ const PaymentResume = (props) => {
           <>
             <tr id={key}>
               <td>
-                <p style={{ fontSize: 12 }}>
-                  <strong>{priceResume[key].length}</strong> noches en{" "}
-                  {seasonName[key]}
-                </p>
+                  {!editPriceMode[key] ?
+                    <p style={{ fontSize: 12 }}>
+                      <strong>{priceResume[key].length}</strong> noches en {seasonName[key]}
+                    </p>
+                  :
+                    <p>Nuevo valor por noche: </p>
+                  }
               </td>
               <td>
-                <p style={{ fontSize: 12 }}>
+                {
+                  !editPriceMode[key] ?
+                  <p style={{ fontSize: 12 }}>
                     <NumberFormat
                       value={priceResume[key][0] * priceResume[key].length}
                       displayType="text"
                       thousandSeparator={true}
                       prefix="$"
                     />
-                    <MdModeEdit/>
-                </p>
+                    <MdModeEdit onClick={() => handleVisibilityInput(key)}/>
+                  </p>
+                  :
+                  <input
+                    className="form-control form-control-sm"
+                    placeholder="Precio noche"
+                    value={priceNight[key]}
+                    name={key}
+                    type="number"
+                    onChange={handlePriceChange}
+                    ref={inputRef}
+                    style={{ width: 80 }}
+                  />
+                }
               </td>
             </tr>
           </>
@@ -53,56 +96,72 @@ const PaymentResume = (props) => {
     return listEntries.map((column) => column);
   };
 
+  const handlePriceChange = ({ target }) => {
+    const { name, value } = target;
+    console.log(value, priceNight, priceResume)
+    setPriceResume((old) => ({
+      ...old,
+      [name]: priceResume[name].map(() => value)
+    }));
+    setPriceNight((old) => ({
+      ...old,
+      [name]: value
+    }))
+  };
+
+  const handleVisibilityInput = (name) => {
+    setEditPriceMode((old) => ({
+      ...old,
+      [name]: true
+    }));
+  }
+
   const handleTotals = () => {
     let totals = { ...initialStateTotal };
     for (let key in dataSeason) {
       if (dataSeason[key].length) {
-        totals.totalNights = totals.totalNights + dataSeason[key].length;
-        totals.totalPayment = totals.totalPayment + (Number(dataSeason[key][0]) * totals.totalNights);
+        totals.totalNights += dataSeason[key].length;
+        totals.totalPayment += Number(dataSeason[key][0]) * totals.totalNights;
       }
     }
     setTotal(totals);
   };
 
   return (
-    // <div className="card">
-    //   <div
-    //     className="card-body"
-    //     style={{ padding: 0, marginBottom: -15, paddingTop: -3 }}
-    //   >
-        <table className="table table-striped table-sm">
-          <thead>
-            <tr>
-              <th scope="col">Detalle noches</th>
-              <th scope="col">Total</th>
-            </tr>
-          </thead>
-          <tbody>
-            {priceResume && <PricesSeason />}
-            <tr className="table-active">
-              <td>
-                <p style={{ fontSize: 12 }}>
-                  <strong>{total.totalNights} noches</strong>
-                </p>
-              </td>
-              <td>
-                <p style={{ fontSize: 12 }}>
-                  <strong>
-                    <NumberFormat
-                      value={total.totalPayment}
-                      displayType="text"
-                      thousandSeparator={true}
-                      prefix="$"
-                    />
-                    <MdModeEdit/>
-                  </strong>
-                </p>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-    //   </div>
-    // </div>
+    <table className="table table-striped table-sm">
+      <thead>
+        <tr>
+          <th scope="col" style={{ fontSize: 12 }}>
+            Detalle noches
+          </th>
+          <th scope="col" style={{ fontSize: 12 }}>
+            Total
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        {priceResume && <PricesSeason />}
+        <tr className="table-active">
+          <td>
+            <p style={{ fontSize: 12 }}>
+              <strong>{total.totalNights} noches</strong>
+            </p>
+          </td>
+          <td>
+            <p style={{ fontSize: 12 }}>
+              <strong>
+                <NumberFormat
+                  value={total.totalPayment}
+                  displayType="text"
+                  thousandSeparator={true}
+                  prefix="$"
+                />
+              </strong>
+            </p>
+          </td>
+        </tr>
+      </tbody>
+    </table>
   );
 };
 
