@@ -37,8 +37,15 @@ const PaymentResume = React.memo(({ dataSeason }) => {
 
   useEffect(() => {
     setPriceResume(dataSeason);
-    handleTotals();
   }, [dataSeason]);
+
+  useEffect(() => {
+    handleTotals();
+  }, [priceResume])
+
+  useEffect(() => {
+    console.log(priceResume)
+  }, [priceResume])
 
   const InputPrice = React.memo(({nameInput}) => {
 
@@ -121,8 +128,8 @@ const PaymentResume = React.memo(({ dataSeason }) => {
     </>
   };
 
-  const handleChangePricesNights = (nameSeason, newPriceNight) => {
-    setPriceResume((old) => ({
+  const handleChangePricesNights = async (nameSeason, newPriceNight) => {
+    await setPriceResume((old) => ({
       ...old,
       [nameSeason]: priceResume[nameSeason].map(() => newPriceNight)
     }));
@@ -136,11 +143,11 @@ const PaymentResume = React.memo(({ dataSeason }) => {
   };
 
   const handleTotals = () => {
-    let totals = { ...initialStateTotal };
-    for (let key in dataSeason) {
-      if (dataSeason[key].length) {
-        totals.totalNights += dataSeason[key].length;
-        totals.totalPayment += Number(dataSeason[key][0]) * totals.totalNights;
+    let totals = { ...initialStateTotal }; 
+    for (let key in priceResume) {
+      if (priceResume[key].length) {
+        totals.totalNights += priceResume[key].length;
+        totals.totalPayment += (Number(priceResume[key].slice(0,1)) * priceResume[key].length);
       }
     }
     setTotal(totals);
