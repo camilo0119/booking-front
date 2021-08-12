@@ -1,9 +1,8 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import NumberFormat from "react-number-format";
 import { MdModeEdit } from "react-icons/md";
 
-const PaymentResume = (props) => {
-  const { dataSeason } = props;
+const PaymentResume = React.memo(({ dataSeason }) => {
   const initialStateTotal = {
     totalNights: 0,
     totalPayment: 0,
@@ -18,103 +17,123 @@ const PaymentResume = (props) => {
     useEffect(() => {
       const handleClickOutside = (event) => {
         if (inputRef.current && !inputRef.current.contains(event.target)) {
-          setEditPriceMode(initialPricesSeason)
+          setEditPriceMode(initialPricesSeason);
         }
-      }
+      };
       document.addEventListener("mousedown", handleClickOutside);
-        return () => {
+      return () => {
         // Unbind the event listener on clean up
         document.removeEventListener("mousedown", handleClickOutside);
       };
-    }, [inputRef])
-  }
+    }, [inputRef]);
+  };
 
   const [priceResume, setPriceResume] = useState({});
   const [total, setTotal] = useState(initialStateTotal);
   const [priceNight, setPriceNight] = useState(initialPricesSeason);
   const [editPriceMode, setEditPriceMode] = useState(initialPricesSeason);
-  const inputRef = useRef(null);
+  const inputRef = useRef();
   useOutSideInput(inputRef);
 
   useEffect(() => {
     setPriceResume(dataSeason);
     handleTotals();
-    console.log(dataSeason);
   }, [dataSeason]);
 
+  const InputPrice = React.memo(({nameInput}) => {
+
+    const [inputData, setInputData] = useState(initialPricesSeason)
+
+    const handlePriceChange = ({ target }) => {
+      const { name, value } = target;
+      setInputData((old) => ({
+        ...old,
+        [name]: Number(value),
+      }));
+    };
+
+    const handleEnterPress = (e) => {
+      if (e.key === 'Enter') {
+        setEditPriceMode(initialPricesSeason)
+        handleChangePricesNights(nameInput, inputData[nameInput])
+      }
+    }
+
+    return (
+      <input
+        className="form-control form-control-sm"
+        placeholder="Precio noche"
+        value={priceNight[nameInput]}
+        name={nameInput}
+        key={`season${nameInput}`}
+        type="number"
+        onChange={handlePriceChange}
+        ref={inputRef}
+        style={{ width: 80 }}
+        onKeyDown={handleEnterPress}
+      />
+    );
+  });
+
   const PricesSeason = () => {
-    const listEntries = [];
+    
     const seasonName = {
       lowSeason: "temporada baja",
       midSeason: "temporada media",
       highSeason: "temporada alta",
     };
-    for (let key in priceResume) {
-      if (priceResume[key].length) {
-        listEntries.push(
-          <>
-            <tr id={key}>
-              <td>
-                  {!editPriceMode[key] ?
-                    <p style={{ fontSize: 12 }}>
-                      <strong>{priceResume[key].length}</strong> noches en {seasonName[key]}
-                    </p>
-                  :
-                    <p>Nuevo valor por noche: </p>
-                  }
-              </td>
-              <td>
-                {
-                  !editPriceMode[key] ?
-                  <p style={{ fontSize: 12 }}>
-                    <NumberFormat
-                      value={priceResume[key][0] * priceResume[key].length}
-                      displayType="text"
-                      thousandSeparator={true}
-                      prefix="$"
-                    />
-                    <MdModeEdit onClick={() => handleVisibilityInput(key)}/>
-                  </p>
-                  :
-                  <input
-                    className="form-control form-control-sm"
-                    placeholder="Precio noche"
-                    value={priceNight[key]}
-                    name={key}
-                    type="number"
-                    onChange={handlePriceChange}
-                    ref={inputRef}
-                    style={{ width: 80 }}
+
+    return <>
+      {
+        Object.keys(priceResume).map((key) => (
+          (priceResume && priceResume[key].length) ?
+          <tr id={key}>
+            <td>
+              {!editPriceMode[key] ? (
+                <p style={{ fontSize: 12 }}>
+                  <strong>{priceResume[key].length}</strong> noches en{" "}
+                  {seasonName[key]}
+                </p>
+              ) : (
+                <p>Nuevo valor por noche: </p>
+              )}
+            </td>
+            <td>
+              {!editPriceMode[key] ? (
+                <p style={{ fontSize: 12 }}>
+                  <NumberFormat
+                    value={priceResume[key][0] * priceResume[key].length}
+                    displayType="text"
+                    thousandSeparator={true}
+                    prefix="$"
                   />
-                }
-              </td>
-            </tr>
-          </>
-        );
+                  <MdModeEdit onClick={() => handleVisibilityInput(key)} />
+                </p>
+              ) : (
+                <InputPrice nameInput={key} key={key} editMode={editPriceMode[key]}/>
+              )}
+            </td>
+          </tr>
+          :
+          null
+        ))
       }
-    }
-    return listEntries.map((column) => column);
+    </>
   };
 
-  const handlePriceChange = ({ target }) => {
-    const { name, value } = target;
-    console.log(value, priceNight, priceResume)
+  const handleChangePricesNights = (nameSeason, newPriceNight) => {
     setPriceResume((old) => ({
       ...old,
-      [name]: priceResume[name].map(() => value)
+      [nameSeason]: priceResume[nameSeason].map(() => newPriceNight)
     }));
-    setPriceNight((old) => ({
-      ...old,
-      [name]: value
-    }))
-  };
+  }
 
   const handleVisibilityInput = (name) => {
     setEditPriceMode((old) => ({
       ...old,
-      [name]: true
+      [name]: true,
     }));
-  }
+  };
 
   const handleTotals = () => {
     let totals = { ...initialStateTotal };
@@ -140,7 +159,7 @@ const PaymentResume = (props) => {
         </tr>
       </thead>
       <tbody>
-        {priceResume && <PricesSeason />}
+        <PricesSeason />
         <tr className="table-active">
           <td>
             <p style={{ fontSize: 12 }}>
@@ -163,6 +182,6 @@ const PaymentResume = (props) => {
       </tbody>
     </table>
   );
-};
+});
 
 export default PaymentResume;

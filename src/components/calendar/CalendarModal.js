@@ -66,8 +66,8 @@ const CalendarModal = () => {
 
   const { notes, startDate, endDate } = formValues;
 
-  useEffect(() => {
-    getAllEdiffices();
+  useEffect(async () => {
+    await getAllEdiffices();
     dispatch(getSeason());
   }, []);
 
@@ -191,7 +191,6 @@ const CalendarModal = () => {
 
   const handleApartmentSelect = ({ target }) => {
     const apartmentData = JSON.parse(target.value);
-    console.log(apartmentData);
     if (apartmentData._id) {
       setApartmentSelected(apartmentData);
       setFormValues((old) => ({
