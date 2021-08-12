@@ -43,10 +43,6 @@ const PaymentResume = React.memo(({ dataSeason }) => {
     handleTotals();
   }, [priceResume])
 
-  useEffect(() => {
-    console.log(priceResume)
-  }, [priceResume])
-
   const InputPrice = React.memo(({nameInput}) => {
 
     const [inputData, setInputData] = useState(initialPricesSeason)
